@@ -15,17 +15,17 @@ from scrapy.linkextractors import LinkExtractor
 filePath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(filePath)
 
-nahdiJson = filePath + r"\NahdiJson.json"
+competitorJson = filePath + r"\competitorJson.json"
 
 try:
-    os.remove(nahdiJson)
+    os.remove(competitorJson)
 except:
     pass
 
 items = []
 
 
-class NahdiItem(scrapy.Item):
+class CompetitorItem(scrapy.Item):
     name = scrapy.Field()
     sku = scrapy.Field()
     price = scrapy.Field()
@@ -34,84 +34,84 @@ class NahdiItem(scrapy.Item):
     url = scrapy.Field()
 
 
-class NahdiSpider(SitemapSpider):
-    name = "Nahdi"
-    allowed_domains = ["www.nahdionline.com"]
+class CompetitorSpider(SitemapSpider):
+    name = "Competitor"
+    allowed_domains = ["www.competitoronline.com"]
 
     sitemap_urls = [
-        "https://www.nahdionline.com/media/sitemap_en-7-1.xml",
-        "https://www.nahdionline.com/media/sitemap_en-7-2.xml",
-        "https://www.nahdionline.com/media/sitemap_en-7-3.xml",
-        "https://www.nahdionline.com/media/sitemap_en-7-4.xml",
+        "https://www.competitoronline.com/media/sitemap_en-7-1.xml",
+        "https://www.competitoronline.com/media/sitemap_en-7-2.xml",
+        "https://www.competitoronline.com/media/sitemap_en-7-3.xml",
+        "https://www.competitoronline.com/media/sitemap_en-7-4.xml",
     ]
 
-    # class NahdiSpider(CrawlSpider):
-    #     name = "Nahdi"
-    #     allowed_domains = ["www.nahdionline.com"]
+    # class CompetitorSpider(CrawlSpider):
+    #     name = "Competitor"
+    #     allowed_domains = ["www.competitoronline.com"]
 
-    # start_urls = ["https://www.nahdionline.com/en"]
+    # start_urls = ["https://www.competitoronline.com/en"]
 
     # rules = [
     #     Rule(
-    #         LinkExtractor(allow="https://www.nahdionline.com/en/"),
+    #         LinkExtractor(allow="https://www.competitoronline.com/en/"),
     #         follow=True,
     #         callback="parse",
     #     )
     # ]
 
     custom_settings = {
-        "FEED_URI": nahdiJson,
+        "FEED_URI": competitorJson,
         "FEED_FORMAT": "json",  # "DEPTH_LIMIT": 2, # "CLOSESPIDER_PAGECOUNT": 150,# "FEED_EXPORT_FIELDS": ["name", "price"],
     }
 
     def parse(self, response):
-        nahdiItem = NahdiItem()
-        nahdiItem["sku"] = response.xpath(
+        competitorItem = CompetitorItem()
+        competitorItem["sku"] = response.xpath(
             '//*[@class="product-info-main"]//*[@class="product-info-price"]/following-sibling::div/@data-sku'
         ).get()
-        nahdiItem["name"] = response.xpath(
+        competitorItem["name"] = response.xpath(
             '//*[@class="product-info-main"]//*[@data-ui-id="page-title-wrapper"]/text()'
         ).get()
-        nahdiItem["price"] = response.xpath(
+        competitorItem["price"] = response.xpath(
             '//*[@class="product-info-main"]//*[@data-price-type="oldPrice"]//*[@class="price"]/text()'
         ).get()
-        nahdiItem["finalPrice"] = response.xpath(
+        competitorItem["finalPrice"] = response.xpath(
             '//*[@class="product-info-main"]//*[@data-price-type="finalPrice"]//*[@class="price"]/text()'
         ).get()
-        # nahdiItem["promo"] = response.xpath(
-        #     '//*[@class="product-info-main"]//*[@class="nahdi-promo-sku"]/div/text()'
+        # competitorItem["promo"] = response.xpath(
+        #     '//*[@class="product-info-main"]//*[@class="competitor-promo-sku"]/div/text()'
         # ).get()
-        # nahdiItem["promo"] = response.xpath(
-        #     '//*[@class="product-info-main"]//*[@class="nahdi-promo"]/text()'
+        # competitorItem["promo"] = response.xpath(
+        #     '//*[@class="product-info-main"]//*[@class="competitor-promo"]/text()'
         # ).get()
-        # nahdiItem["promo"] = response.xpath(
-        #     '//*[@id="ais-category-subtree"]//*[@class="nahdi-promo"]/text()'
+        # competitorItem["promo"] = response.xpath(
+        #     '//*[@id="ais-category-subtree"]//*[@class="competitor-promo"]/text()'
         # ).get()
-        nahdiItem["url"] = response.url
+        competitorItem["url"] = response.url
         items.append(
             {
-                "sku": nahdiItem["sku"],
-                "name": nahdiItem["name"],
-                "price": nahdiItem["price"],
-                "finalPrice": nahdiItem["finalPrice"],
-                # "promo": nahdiItem["promo"],
-                "url": nahdiItem["url"],
+                "sku": competitorItem["sku"],
+                "name": competitorItem["name"],
+                "price": competitorItem["price"],
+                "finalPrice": competitorItem["finalPrice"],
+                # "promo": competitorItem["promo"],
+                "url": competitorItem["url"],
             }
         )
-        return nahdiItem
+        return competitorItem
 
 
 crawler = CrawlerProcess(settings=get_project_settings())
-crawler.crawl(NahdiSpider)
+crawler.crawl(CompetitorSpider)
 crawler.start()
 
 
-def Nahdiprepare():
-    nahdiOld = filePath + r"\NahdiOld.xlsx"  # nahdiNew = filePath + r"\NahdiNew.xlsx"
-    nahdiChanges = filePath + r"\NahdiChanges.xlsx"
-    nahdiBackup = filePath + r"\NahdiBackup.xlsx"
+def Competitorprepare():
+    competitorOld = filePath + r"\CompetitorOld.xlsx"  # competitorNew = filePath + r"\CompetitorNew.xlsx"
+    competitorChanges = filePath + r"\CompetitorChanges.xlsx"
+    competitorBackup = filePath + r"\CompetitorBackup.xlsx"
 
-    dfNew = pd.DataFrame(pd.read_json(nahdiJson)).dropna(thresh=3).fillna(0)
+    dfNew = pd.DataFrame(pd.read_json(competitorJson)).dropna(thresh=3).fillna(0)
     NewCoList = {"columns": [{"header": column} for column in dfNew.columns]}
 
     dfNewNoSku = dfNew[dfNew["sku"] == 0]
@@ -123,7 +123,7 @@ def Nahdiprepare():
     dfNew.drop_duplicates(["sku"], inplace=True)
     dfNew.set_index("sku", inplace=True)
 
-    dfOld = pd.DataFrame(pd.read_excel(nahdiOld)).fillna(0)
+    dfOld = pd.DataFrame(pd.read_excel(competitorOld)).fillna(0)
 
     dfOldNoSku = dfOld[dfOld["sku"] == 0]
     dfOldNoSku.pop("sku")
@@ -134,17 +134,17 @@ def Nahdiprepare():
     dfOld.drop_duplicates(["sku"], inplace=True)
     dfOld.set_index("sku", inplace=True)  # dfNew.set_index("sku", inplace=True)
 
-    dfNahdiChanges = pd.DataFrame(pd.read_excel(nahdiChanges))
-    dfNahdiChanges["Date"] = pd.to_datetime(dfNahdiChanges["Date"]).dt.date
-    ChangesCoList = [{"header": column} for column in dfNahdiChanges.columns]
-    dfNahdiChanges.set_index("EntryNo", inplace=True)
+    dfCompetitorChanges = pd.DataFrame(pd.read_excel(competitorChanges))
+    dfCompetitorChanges["Date"] = pd.to_datetime(dfCompetitorChanges["Date"]).dt.date
+    ChangesCoList = [{"header": column} for column in dfCompetitorChanges.columns]
+    dfCompetitorChanges.set_index("EntryNo", inplace=True)
 
     for ind in dfNew.index:
         if ind in dfOld.index:
             # for c in range(dfNew.shape[1] - 1):
             for c in [0]:
                 if dfNew.loc[ind][c] != dfOld.loc[ind][c]:
-                    dfNahdiChanges.loc[len(dfNahdiChanges.index)] = [
+                    dfCompetitorChanges.loc[len(dfCompetitorChanges.index)] = [
                         ind,
                         dfNew.loc[ind][0],
                         dfNew.columns[c],
@@ -170,7 +170,7 @@ def Nahdiprepare():
                         priceOfferStatus = "OfferImproved"
                     else:
                         priceOfferStatus = "OfferWeakened"
-                dfNahdiChanges.loc[len(dfNahdiChanges.index)] = [
+                dfCompetitorChanges.loc[len(dfCompetitorChanges.index)] = [
                     ind,
                     dfNew.loc[ind][0],
                     priceOfferStatus,
@@ -181,7 +181,7 @@ def Nahdiprepare():
                 ]
         else:
             # if (dfOld[dfOld["name"] == dfNew.loc[ind][0]]).empty:
-            dfNahdiChanges.loc[len(dfNahdiChanges.index)] = [
+            dfCompetitorChanges.loc[len(dfCompetitorChanges.index)] = [
                 ind,
                 dfNew.loc[ind][0],
                 "Added",
@@ -216,7 +216,7 @@ def Nahdiprepare():
                         priceOfferStatus = "OfferImproved"
                     else:
                         priceOfferStatus = "OfferWeakened"
-                dfNahdiChanges.loc[len(dfNahdiChanges.index)] = [
+                dfCompetitorChanges.loc[len(dfCompetitorChanges.index)] = [
                     "",
                     ind,
                     priceOfferStatus,
@@ -226,7 +226,7 @@ def Nahdiprepare():
                     datetime.datetime.today().time().strftime("%I %p"),
                 ]
         else:
-            dfNahdiChanges.loc[len(dfNahdiChanges.index)] = [
+            dfCompetitorChanges.loc[len(dfCompetitorChanges.index)] = [
                 "",
                 ind,
                 "Added",
@@ -242,27 +242,27 @@ def Nahdiprepare():
         else:
             dfNewNoSku.loc[ind] = dfOldNoSku.loc[ind]
 
-    fileChanges = filePath + r"\NahdiChanges.xlsx"
+    fileChanges = filePath + r"\CompetitorChanges.xlsx"
 
-    dfNahdiChanges.sort_values(["Date", "Change", "Name"], inplace=True)
+    dfCompetitorChanges.sort_values(["Date", "Change", "Name"], inplace=True)
     with pd.ExcelWriter(fileChanges, engine="xlsxwriter") as writer:
-        dfNahdiChanges.to_excel(writer)
+        dfCompetitorChanges.to_excel(writer)
         ws = writer.sheets["Sheet1"]
         ws.add_table(
             0,
             0,
-            dfNahdiChanges.shape[0],
-            dfNahdiChanges.shape[1],
+            dfCompetitorChanges.shape[0],
+            dfCompetitorChanges.shape[1],
             {"columns": ChangesCoList},
         )
         ws.set_column(0, 0, 10)
-        for idx, col in enumerate(dfNahdiChanges.columns):
-            series = dfNahdiChanges[col]
+        for idx, col in enumerate(dfCompetitorChanges.columns):
+            series = dfCompetitorChanges[col]
             maxLen = max(series.astype(str).map(len).max(), len(str(series.name)) + 2)
             maxLen = 45 if maxLen > 45 else maxLen
             ws.set_column(idx + 1, idx + 1, maxLen)
 
-    shutil.copy(nahdiOld, nahdiBackup)
+    shutil.copy(competitorOld, competitorBackup)
 
     dfNew.reset_index(inplace=True)
     dfNewNoSku.reset_index(inplace=True)
@@ -270,7 +270,7 @@ def Nahdiprepare():
     dfNewNoSku = dfNewNoSku[["sku", "name", "price", "finalPrice", "url"]]
     dfNew = pd.concat([dfNew, dfNewNoSku])
 
-    with pd.ExcelWriter(nahdiOld, engine="xlsxwriter") as writer:
+    with pd.ExcelWriter(competitorOld, engine="xlsxwriter") as writer:
         dfNew.to_excel(writer, index=False)
         ws = writer.sheets["Sheet1"]
         ws.add_table(
@@ -288,4 +288,4 @@ def Nahdiprepare():
             ws.set_column(idx, idx, maxLen)
 
 
-Nahdiprepare()
+Competitorprepare()
